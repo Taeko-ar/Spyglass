@@ -1,17 +1,10 @@
-# Spyglass
+# Spyglass (WotLK 3.3.5a)
 
-Why? I'm lazy and I don't want to type on the db the name of the npc and search for the specific npc I'm looking for.
+World of Warcraft addon that allows you to right-click on an NPC, item, quest, or spell in the game and get a link to the database you are using.
 
 ## Features
 
-- **Configurable Database URL**: Prompt-based setup UI on first load. Easily switch between preconfigured presets (like OctoWoW DB, Classic DB, etc.) or type in your own custom server database URL!
-- **Startup Suggestions**: Displays a smart suggestion (`https://octowow.st/db/`) on first startup that you can click to automatically fill.
-
-## Dependencies
-
-- **WoW 1.12.1 (Vanilla)**: Because the base Vanilla client does not natively expose precise NPC IDs to the Lua API, **this addon utilizes [SuperWow](https://github.com/balakethelock/SuperWoW)** for exact ID extraction.
-
-*If neither of these native IDs are found (or you don't run SuperWoW), the addon features an automatic smart-fallback that generates a URL to query the database by the NPC's actual name rather than their exact database ID.*
+- **Configurable Database URL**: Prompt-based setup UI on first load to tailor for custom servers databases.
 
 ## How it Works
 
@@ -32,15 +25,3 @@ Why? I'm lazy and I don't want to type on the db the name of the npc and search 
 ## Translations
 
 This plugin has translations and support for Spanish and Portuguese.
-
-## Supported Unitframes
-
-The right-click context menu seamlessly intercepts interaction for most commonly used Vanilla Unitframe addons natively:
-- **Default Blizzard Target Frames**
-- **pfUI** (`pfTarget`)
-- **LunaUnitFrames** (`LunaTargetFrame`)
-- **XPerl** (`XPerl_Target`)
-- **Shadowed Unit Frames** (`SUFUnittarget`)
-- **DiscordUnitFrames** (`DUF_TargetFrame`)
-
-*Note: The addon also explicitly hooks into the overarching `ClickCastFrames` API protocol, granting it universal out-of-the-box compatibility with almost any obscure or custom unit frame addon.*

@@ -120,39 +120,15 @@ local function GetTableLength(t)
     end
 end
 
--- Presets configuration
-local dbPresets = {
-    { name = "OctoWoW DB", url = "https://octowow.st/db/" },
-    { name = "Classic DB", url = "https://classicdb.ch/" },
-    { name = "Vanilla DB", url = "https://vanilladb.cwowd.com/" },
-}
-
 -- Setup UI Frame (Created lazily)
 local Spyglass_SetupFrame = nil
-
-local function UpdateDropdownSelection(url)
-    local dropdown = getglobal("Spyglass_SetupDropdown")
-    if not dropdown then return end
-    
-    local found = false
-    for _, item in ipairs(dbPresets) do
-        if item.url == url then
-            UIDropDownMenu_SetText(dropdown, item.name)
-            found = true
-            break
-        end
-    end
-    if not found then
-        UIDropDownMenu_SetText(dropdown, "Custom URL...")
-    end
-end
 
 function Spyglass_ShowSetupFrame()
     if not Spyglass_SetupFrame then
         -- Frame container
         Spyglass_SetupFrame = CreateFrame("Frame", "Spyglass_SetupFrame", UIParent)
         Spyglass_SetupFrame:SetWidth(400)
-        Spyglass_SetupFrame:SetHeight(260)
+        Spyglass_SetupFrame:SetHeight(180)
         Spyglass_SetupFrame:SetPoint("CENTER", UIParent, "CENTER")
         Spyglass_SetupFrame:SetMovable(true)
         Spyglass_SetupFrame:EnableMouse(true)
@@ -184,7 +160,7 @@ function Spyglass_ShowSetupFrame()
         local editBox = CreateFrame("EditBox", "Spyglass_SetupEditBox", Spyglass_SetupFrame, "InputBoxTemplate")
         editBox:SetWidth(340)
         editBox:SetHeight(32)
-        editBox:SetPoint("TOPLEFT", Spyglass_SetupFrame, "TOPLEFT", 30, -120)
+        editBox:SetPoint("TOPLEFT", Spyglass_SetupFrame, "TOPLEFT", 30, -70)
         editBox:SetAutoFocus(false)
         editBox:SetMaxLetters(255)
         
@@ -198,7 +174,7 @@ function Spyglass_ShowSetupFrame()
         suggestText:SetAllPoints(suggestBtn)
         suggestText:SetJustifyH("LEFT")
         
-        local recUrl = "https://octowow.st/db/"
+        local recUrl = "https://wotlkdb.com/"
         suggestText:SetText(string.format(L["SETUP_SUGGEST"], "|cff00ffff" .. recUrl .. "|r"))
         
         suggestBtn:SetScript("OnClick", function()
@@ -210,42 +186,6 @@ function Spyglass_ShowSetupFrame()
         end)
         suggestBtn:SetScript("OnLeave", function()
             suggestText:SetText(string.format(L["SETUP_SUGGEST"], "|cff00ffff" .. recUrl .. "|r"))
-        end)
-        
-        -- Dropdown Menu (QoL Preset Select)
-        local dropdown = CreateFrame("Frame", "Spyglass_SetupDropdown", Spyglass_SetupFrame, "UIDropDownMenuTemplate")
-        dropdown:SetPoint("TOPLEFT", Spyglass_SetupFrame, "TOPLEFT", 15, -75)
-        UIDropDownMenu_SetWidth(180, dropdown)
-        
-        UIDropDownMenu_Initialize(dropdown, function()
-            local info = {}
-            
-            info.text = L["SETUP_PRESETS"]
-            info.isTitle = 1
-            info.notCheckable = 1
-            UIDropDownMenu_AddButton(info)
-            
-            for _, item in ipairs(dbPresets) do
-                info = {}
-                info.text = item.name
-                info.notCheckable = 1
-                info.func = function()
-                    editBox:SetText(item.url)
-                    UIDropDownMenu_SetText(dropdown, item.name)
-                    CloseDropDownMenus()
-                end
-                UIDropDownMenu_AddButton(info)
-            end
-            
-            -- Custom Option
-            info = {}
-            info.text = "Custom URL..."
-            info.notCheckable = 1
-            info.func = function()
-                UIDropDownMenu_SetText(dropdown, "Custom URL...")
-                CloseDropDownMenus()
-            end
-            UIDropDownMenu_AddButton(info)
         end)
         
         -- Save Button
@@ -292,8 +232,10 @@ function Spyglass_ShowSetupFrame()
     
     local editBox = getglobal("Spyglass_SetupEditBox")
     local savedUrl = SpyglassDB.dbUrl or ""
+    if savedUrl == "" then
+        savedUrl = "https://wotlkdb.com/"
+    end
     editBox:SetText(savedUrl)
-    UpdateDropdownSelection(savedUrl)
     
     Spyglass_SetupFrame:Show()
 end
@@ -303,6 +245,8 @@ StaticPopupDialogs["SPYGLASS_POPUP"] = {
     button1 = L["CLOSE"],
     hasEditBox = 1,
     maxLetters = 999,
+    closeButton = true,
+    closeButtonIsHide = true,
     OnShow = function()
         local editBox = getglobal(this:GetName().."EditBox")
         if editBox then
@@ -312,7 +256,7 @@ StaticPopupDialogs["SPYGLASS_POPUP"] = {
             -- Use the configured dbUrl, falling back to suggestion if blank.
             local url = SpyglassDB.dbUrl or ""
             if url == "" then
-                url = "https://octowow.st/db/"
+                url = "https://wotlkdb.com/"
             end
             
             local lookupType = data and data.type or "npc"
@@ -360,6 +304,7 @@ StaticPopupDialogs["SPYGLASS_POPUP"] = {
 local function ExtractNPCID(guid)
     if type(guid) ~= "string" then return "Unknown" end
     
+    -- Try hyphenated format (modern / retail / classic-era client on modern engine)
     if string.find(guid, "-") then
         local parts = {}
         for part in string.gfind(guid, "([^-]+)") do
@@ -370,24 +315,16 @@ local function ExtractNPCID(guid)
         end
     end
 
+    -- Try hex format (WoW 3.3.5a client)
+    local cleanGuid = guid
     if string.sub(guid, 1, 2) == "0x" then
-        local val_end = tonumber(string.sub(guid, -10, -7), 16)
-        local val_front = tonumber(string.sub(guid, 7, 10), 16)
-        local val_mid = tonumber(string.sub(guid, 9, 12), 16)
-        local val_nine_fourteen = tonumber(string.sub(guid, 9, 14), 16)
-        local val_seven_twelve = tonumber(string.sub(guid, 7, 12), 16)
-        
-        DebugMsg("Extraction candidates:")
-        DebugMsg("(-10 to -7) -> " .. tostring(string.sub(guid, -10, -7)) .. " = " .. tostring(val_end))
-        DebugMsg("(7 to 10) -> " .. tostring(string.sub(guid, 7, 10)) .. " = " .. tostring(val_front))
-        DebugMsg("(9 to 12) -> " .. tostring(string.sub(guid, 9, 12)) .. " = " .. tostring(val_mid))
-        DebugMsg("(9 to 14) -> " .. tostring(string.sub(guid, 9, 14)) .. " = " .. tostring(val_nine_fourteen))
-        DebugMsg("(7 to 12) -> " .. tostring(string.sub(guid, 7, 12)) .. " = " .. tostring(val_seven_twelve))
-
-        if tonumber(string.sub(guid, -10, -7), 16) ~= 0 then
-            return tonumber(string.sub(guid, -10, -7), 16)
-        end
-        return tonumber(string.sub(guid, 7, 10), 16) or "Unknown"
+        cleanGuid = string.sub(guid, 3)
+    end
+    
+    if string.len(cleanGuid) == 16 then
+        -- In WotLK, the creature entry ID is indices 7 to 10 of the hex string (excluding 0x)
+        local npcIdHex = string.sub(cleanGuid, 7, 10)
+        return tonumber(npcIdHex, 16) or "Unknown"
     end
 
     return "Unknown"
