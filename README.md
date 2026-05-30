@@ -2,6 +2,8 @@
 
 Why? I'm lazy and I don't want to type on the db the name of the npc and search for the specific npc I'm looking for.
 
+_WOTLK version [here](https://github.com/Taeko-ar/Spyglass/tree/3.3.5a)_
+
 ## Features
 
 - **Configurable Database URL**: Prompt-based setup UI on first load. Easily switch between preconfigured presets (like OctoWoW DB, Classic DB, etc.) or type in your own custom server database URL!
