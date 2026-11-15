@@ -1,8 +1,9 @@
-## Interface: 30300
+## Interface: 16001
 ## Title: Spyglass
 ## Notes: Right-click unit frames or Ctrl+Right-click item/quest/spell links to get a direct database lookup link.
 ## Author: Taeko
-## Version: 1.1.0
+## Version: 2.0.0
 ## SavedVariables: SpyglassDB
-## OptionalDeps: pfUI, LunaUnitFrames, XPerl, SUF, DUF, DiscordUnitFrames
+
+Locales.lua
 Spyglass.lua

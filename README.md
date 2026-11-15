@@ -1,4 +1,4 @@
-# Spyglass (WotLK 3.3.5a)
+# Spyglass (WoW Forever)
 
 World of Warcraft addon that allows you to right-click on an NPC, item, quest, or spell in the game and get a link to the database you are using.
 
@@ -19,7 +19,6 @@ World of Warcraft addon that allows you to right-click on an NPC, item, quest, o
 - `/spyglass` (or `/qdb`) - Force a database lookup on your current target via chat instead of using the right-click menu.
 - `/spyglass setup` - Reopen the database URL configuration panel.
 - `/spyglass toggle` - Enable or disable the addon.
-- `/spyglass debug` - Toggles the debug mode.
 - `/spyglass help` - Shows a list of available slash commands.
 
 ## Translations
